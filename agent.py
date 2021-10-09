@@ -12,6 +12,7 @@ class Agent:
         self.node_goal = kwargs.get('node_goal', 10)
         self.cost_sheet = []
         self.benefit_sheet = []
+        self.profit_sheet = []
         self.threshold_good_price_to_sell = kwargs.get('price_to_sell', random.randint(350, 700))  # TODO not used
         self.total_strong_wallet = kwargs.get('starting_strong', 0) # TODO not used
         self.total_strong_accum = kwargs.get('pending_strong', 0) # TODO not used
@@ -71,7 +72,8 @@ class Agent:
             raise Exception('Agent has not ticked')
 
     def _get_profits_till_now(self):
-        return sum(self.benefit_sheet) - sum(self.cost_sheet)
+        return round(sum(self.benefit_sheet) - sum(self.cost_sheet), 2)
 
     def prepare_next_tick(self):
+        self.profit_sheet.append(self._get_profits_till_now()) # TODO slow, we need cumsum
         self.__has_ticked = False

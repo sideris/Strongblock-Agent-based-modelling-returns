@@ -1,7 +1,7 @@
 import random
 
 from agent import Agent
-from constants import RATIONAL_NUMBER_OF_ACC_STRONG_TO_SELL, STRONG_TO_NODE
+from constants import RATIONAL_NUMBER_OF_ACC_STRONG_TO_SELL, STRONG_TO_NODE, CLAIM_COST_WITH_GAS, SELL_STRONG_COST_GAS
 from market import Market
 
 
@@ -79,4 +79,49 @@ class CoinFlipperStrategy(Strategy):
                 self.agent.claim_and_sell(self.market.get_current_price())
             else:
                 self.agent.create_node()
+        self.agent.prepare_next_tick()
+
+
+class SectionSellerBuilderStrategy(Strategy):
+    def __init__(self, agent: Agent, market: Market, start_nodes=1, sections=3):
+        super().__init__(agent, market, start_nodes)
+        self.previous_price = 0
+        self.cost = 0
+        self.total_added = 0
+        self.sections = sections
+        self.remaining = self.agent.node_goal // sections
+
+    def post_agent_tick(self):
+        """ Buy until node_goal/section reached then sell until recoup costs """
+        if self.remaining > 0 and self.total_added < self.agent.node_goal:
+            created = self.agent.create_node()
+            if created:
+                self.cost += self.market.get_current_price() * STRONG_TO_NODE
+                self.remaining -= 1
+                self.total_added += 1
+        elif self.remaining == 0 and self.cost >= 0 and self.agent.total_strong_accum >= STRONG_TO_NODE:
+            self.agent.claim_and_sell(self.market.get_current_price())
+            self.cost += CLAIM_COST_WITH_GAS + SELL_STRONG_COST_GAS - self.agent.profit_sheet[-1]
+            if self.cost < 0:
+                self.remaining = self.agent.node_goal // self.sections
+                if self.remaining > (self.agent.node_goal - self.total_added):
+                    self.remaining = (self.agent.node_goal - self.total_added)
+        else:
+            if self.agent.total_strong_accum >= STRONG_TO_NODE:
+                self.agent.claim_and_sell(self.market.get_current_price())
+        self.agent.prepare_next_tick()
+
+
+class BuilderSellerStrategy(Strategy):
+    def __init__(self, agent: Agent, market: Market, start_nodes=1):
+        super().__init__(agent, market, start_nodes)
+        self.sell_next = False
+
+    def post_agent_tick(self):
+        """ Buy node and then sell """
+        if self.agent.total_strong_accum >= STRONG_TO_NODE and not self.sell_next:
+            self.agent.create_node()
+            self.sell_next = True
+        elif self.sell_next and self.agent.total_strong_accum >= RATIONAL_NUMBER_OF_ACC_STRONG_TO_SELL:
+            self.agent.claim_and_sell(self.market.get_current_price())
         self.agent.prepare_next_tick()
