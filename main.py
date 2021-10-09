@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from agent import Agent
 from market import Market
 from strategy import UpfrontInvestStrategy, SellWhenPriceMoonsStrategy, BuildNodesUntilLimitStrategy, \
@@ -28,9 +30,30 @@ if __name__ == '__main__':
     s8 = BuildNodesUntilLimitStrategy(a8, market)
     s9 = CoinFlipperStrategy(a9, market)
     s10 = CoinFlipperStrategy(a10, market)
-    strategies = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10]
-    for i in range(1, days + 1):
-        for s in strategies:
+    strategies = [s1,
+                 # s2, s3, s4, s5, s6, s7, s8, s9, s10
+                  ]
+    palette = plt.get_cmap('Set1')
+    for s in strategies:
+        s.agent.tick()
+        s.start_agent()
+    for day in range(1, days):
+        for ind, s in enumerate(strategies):
             s.agent.tick()
             s.post_agent_tick()
+            if day % 30 == 0:
+                s.agent.pay_node_maintainance_fees()
             market.tick()
+            plt.plot(day, s.agent._get_profits_till_now(), marker='',
+                     color=palette(ind),
+                     linewidth=1,
+                     alpha=0.9,
+                     label=s.agent.name)
+    print(
+        strategies[0].agent._get_profits_till_now(),
+    )
+    plt.style.use('seaborn-darkgrid')
+    # plt.title("A (bad) Spaghetti plot", loc='left', fontsize=12, fontweight=0, color='orange')
+    plt.xlabel("Days")
+    plt.ylabel("Profit")
+    # plt.show()

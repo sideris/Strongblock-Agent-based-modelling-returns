@@ -45,7 +45,8 @@ class Agent:
     def sell_strong_in_wallet(self, strong_price: float):
         self.__raise_if_not_tick()
         gained = strong_price * self.total_strong_wallet - SELL_STRONG_COST_GAS
-        self.benefit_sheet += gained
+        gained = round(gained, 4)
+        self.benefit_sheet[-1] += gained
         self.total_strong_wallet = 0
 
     def claim_strong(self):
@@ -68,6 +69,9 @@ class Agent:
     def __raise_if_not_tick(self):
         if not self.__has_ticked:
             raise Exception('Agent has not ticked')
+
+    def _get_profits_till_now(self):
+        return sum(self.benefit_sheet) - sum(self.cost_sheet)
 
     def prepare_next_tick(self):
         self.__has_ticked = False
