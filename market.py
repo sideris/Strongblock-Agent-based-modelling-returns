@@ -18,9 +18,9 @@ class Market:
     def get_pc_change(self) -> float:
         if self.price <= 400:
             return random.uniform(-4, 6)
-        if self.price <= 500:
+        if self.price <= 800:
             return random.uniform(-2, 5)
-        if self.price <= 700:
+        if self.price <= 1100:
             return random.uniform(-4, 4)
-        if self.price > 700:
+        if self.price > 1100:
             return random.uniform(-6, 3)
