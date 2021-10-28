@@ -5,6 +5,17 @@ from agent import Agent
 from market import Market
 from strategy import UpfrontInvestStrategy, SellWhenPriceMoonsStrategy, BuildNodesUntilLimitStrategy, \
     CoinFlipperStrategy, SectionSellerBuilderStrategy, BuilderSellerStrategy
+import argparse
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--nodes', dest='nodes', default=10,
+                    type=int,
+                    help='Number of nodes for strategies')
+parser.add_argument('--start_price', dest='start_price', default=400, type=int,
+                    help='$STRONG start price')
+parser.add_argument('--days', dest='days', default=365, type=int,
+                    help='Number of days simulation runs')
+args = parser.parse_args()
 
 
 def human_format(num, pos):
@@ -17,53 +28,29 @@ def human_format(num, pos):
 
 
 if __name__ == '__main__':
-    days = 720
+    days = args.days
     print(f'Starting simulation for {days} days')
-    market = Market(500)
-    a1 = Agent(name='upfront_investor_10')
-    a2 = Agent(name='upfront_investor_30', node_goal=30)
-    a3 = Agent(name='upfront_investor_max', node_goal=200)
-    a4 = Agent(name='moon_seller_10')
-    a5 = Agent(name='moon_seller_30', node_goal=30)
-    a6_1 = Agent(name='node_builder_3', node_goal=3)
-    a6 = Agent(name='node_builder_10')
-    a7 = Agent(name='node_builder_30', node_goal=30)
-    a8 = Agent(name='node_builder_max', node_goal=200)
-    a9 = Agent(name='coin_flipper_10')
-    a10 = Agent(name='coin_flipper_30', node_goal=30)
-    a11 = Agent(name='section_seller_30', node_goal=30)
-    a12 = Agent(name='builder_then_seller_10')
-    a13 = Agent(name='builder_then_seller_30', node_goal=30)
+    market = Market(args.start_price)
+    a1 = Agent(name='upfront_investor', node_goal=args.nodes)
+    a4 = Agent(name='moon_seller', node_goal=args.nodes)
+    a6_1 = Agent(name='node_builder', node_goal=args.nodes)
+    a9 = Agent(name='coin_flipper', node_goal=args.nodes)
+    a11 = Agent(name='section_seller', node_goal=args.nodes)
+    a12 = Agent(name='builder_then_seller', node_goal=args.nodes)
 
     s1 = UpfrontInvestStrategy(a1, market)
-    s2 = UpfrontInvestStrategy(a2, market)
-    s3 = UpfrontInvestStrategy(a3, market)
     s4 = SellWhenPriceMoonsStrategy(a4, market)
-    s5 = SellWhenPriceMoonsStrategy(a5, market)
-    s6 = BuildNodesUntilLimitStrategy(a6, market)
-    s7 = BuildNodesUntilLimitStrategy(a7, market)
-    s8 = BuildNodesUntilLimitStrategy(a8, market)
+    s6 = BuildNodesUntilLimitStrategy(a6_1, market)
     s9 = CoinFlipperStrategy(a9, market)
-    s10 = CoinFlipperStrategy(a10, market)
-    s11 = CoinFlipperStrategy(a6_1, market)
     s12 = SectionSellerBuilderStrategy(a11, market)
     s13 = BuilderSellerStrategy(a12, market)
-    s14 = BuilderSellerStrategy(a13, market)
     strategies = [
         # s1,
-        # s2,
-        # s3,
-        # s4,
-        s5,
+        s4,
         s6,
-        s7,
-        s8,
         s9,
-        s10,
-        s11,
         s12,
         s13,
-        s14
     ]
     palette = plt.get_cmap('Set1')
     for s in strategies:

@@ -48,7 +48,7 @@ class BuildNodesUntilLimitStrategy(Strategy):
 
 
 class SellWhenPriceMoonsStrategy(Strategy):
-    def __init__(self, agent: Agent, market: Market, start_nodes=1, pc_increase=10):
+    def __init__(self, agent: Agent, market: Market, start_nodes=1, pc_increase=15):
         super().__init__(agent, market, start_nodes)
         self.previous_price = 0
         self.pc_increase = pc_increase
